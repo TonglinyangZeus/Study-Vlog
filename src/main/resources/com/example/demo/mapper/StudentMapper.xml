@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.StudentMapper">
+    <insert id="insert">
+        INSERT INTO student (name, no, gender, phone, id_card, is_college, address, degree, graduation_date, clazz_id)
+        VALUES (#{name}, #{no}, #{gender}, #{phone}, #{idCard}, #{isCollege}, #{address}, #{degree}, #{graduationDate}, #{clazzId})
+    </insert>
+    <update id="updateInfo">
+        UPDATE student
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="no != null">
+                no = #{no},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="degree != null">
+                degree = #{degree},
+            </if>
+            <if test="idCard != null">
+                id_card = #{idCard},
+            </if>
+            <if test="isCollege != null">
+                is_college = #{isCollege},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="graduationDate != null">
+                graduation_date = #{graduationDate},
+            </if>
+            <if test="violationCount != null">
+                violation_count = #{violationCount},
+            </if>
+            <if test="violationScore != null">
+                violation_score = #{violationScore},
+            </if>
+            <if test="clazzId != null">
+                clazz_id = #{clazzId}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <update id="handleWrongStudent">
+        update student
+        <set>
+            <if test="score != null">
+                violation_count = violation_count + 1,
+                violation_score = violation_score + #{score}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="deleteByIds" >
+        delete from student where id in
+            <foreach collection="ids" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+    </delete>
+
+    <select id="getStudent" resultType="com.example.demo.pojo.Student">
+        select s.*, c.id clazzId , c.name clazzName from student s  left join clazz c on c.id = s.clazz_id
+        <where>
+            <if test="name != null and name != '' ">
+                s.name like concat('%', #{name}, '%')
+            </if>
+            <if test="degree != null ">
+                and degree = #{degree}
+            </if>
+            <if test="clazzId != null">
+                and clazz_id = #{clazzId}
+            </if>
+        </where>
+    </select>
+    <select id="getStudentDetail" resultType="com.example.demo.pojo.Student">
+        select * from student where id = #{id}
+    </select>
+    <select id="getDegreeCount" resultType="java.util.Map">
+        select
+            case s.degree
+             when 1 then '初中'
+             when 2 then '高中'
+             when 3 then '大专'
+             when 4 then '本科'
+             when 5 then '硕士'
+             when 6 then '博士'
+             end name,
+               count(s.name) value  from student s group by s.degree;
+    </select>
+</mapper>
+
+
+
